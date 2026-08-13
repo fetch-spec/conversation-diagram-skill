@@ -1,0 +1,46 @@
+{
+  "title": "Image Understanding — crop to PTC JSON",
+  "source": "conversation.md",
+  "diagrams": [
+    {
+      "id": "pipeline",
+      "title": "Worker pipeline",
+      "kicker": "Section 4",
+      "blurb": "Only the order/options crop goes to Image Understanding. Docling stays local on the full page. Merge both arms into ptc.json.",
+      "type": "mermaid",
+      "source": "---\nconfig:\n  theme: base\n  themeVariables:\n    darkMode: true\n    background: transparent\n    primaryColor: \"#1c1e21\"\n    primaryTextColor: \"#ecece6\"\n    primaryBorderColor: \"#4d5358\"\n    lineColor: \"#9aa3a8\"\n    secondaryColor: \"#24272b\"\n    tertiaryColor: \"#151719\"\n    fontFamily: \"IBM Plex Sans, ui-sans-serif, system-ui, sans-serif\"\n    fontSize: \"14px\"\n    clusterBkg: \"#141618\"\n    clusterBorder: \"#3a3f44\"\n    titleColor: \"#ecece6\"\n    edgeLabelBackground: \"#151719\"\n    nodeTextColor: \"#ecece6\"\n---\nflowchart TB\n  PDF[\"PDF page\"]\n\n  subgraph ingest[\"Rasterize + crop\"]\n    direction TB\n    CROP[\"Crop order / options box\"]\n    PNG[\"order_crop.png<br/>PNG or JPEG only\"]\n    CROP --> PNG\n  end\n\n  subgraph vlm[\"VLM arm\"]\n    direction TB\n    FN[\"understand_order_crop()\"]\n    MODEL[\"grok-4.6 · detail high\"]\n    JSON[\"Partial PTC JSON<br/>model + options\"]\n    FN --> MODEL --> JSON\n  end\n\n  subgraph local[\"Text arm\"]\n    direction TB\n    DOC[\"Docling on full page\"]\n    SPEC[\"specs / tables\"]\n    DOC --> SPEC\n  end\n\n  MERGE[\"merge → ptc.json\"]\n  VAL[\"validate\"]\n  DONE[\"done\"]\n\n  PDF --> CROP\n  PDF --> DOC\n  PNG --> FN\n  JSON --> MERGE\n  SPEC --> MERGE\n  MERGE --> VAL --> DONE\n"
+    },
+    {
+      "id": "vlm-call",
+      "title": "Image Understanding call",
+      "kicker": "Sections 2–3",
+      "blurb": "Encode the crop as a data URL, send it with the Product Type Contract prompt, then parse the model’s JSON (strip accidental fences first).",
+      "type": "mermaid",
+      "source": "---\nconfig:\n  theme: base\n  themeVariables:\n    darkMode: true\n    background: transparent\n    primaryColor: \"#1c1e21\"\n    primaryTextColor: \"#ecece6\"\n    primaryBorderColor: \"#4d5358\"\n    lineColor: \"#9aa3a8\"\n    secondaryColor: \"#24272b\"\n    tertiaryColor: \"#151719\"\n    fontFamily: \"IBM Plex Sans, ui-sans-serif, system-ui, sans-serif\"\n    fontSize: \"14px\"\n    clusterBkg: \"#141618\"\n    clusterBorder: \"#3a3f44\"\n    titleColor: \"#ecece6\"\n    edgeLabelBackground: \"#151719\"\n    nodeTextColor: \"#ecece6\"\n---\nflowchart LR\n  FILE[\"Crop file<br/>jpg / jpeg / png\"]\n  SIZE{\"Size ≤ 20 MiB?\"}\n  B64[\"base64 data URL\"]\n  MSG[\"user + image<br/>detail = high\"]\n  CALL[\"chat.sample()<br/>or responses.create\"]\n  STRIP[\"Strip markdown fences\"]\n  PARSE[\"json.loads\"]\n  OUT[\"Contract fragment\"]\n\n  FILE --> SIZE\n  SIZE -->|yes| B64\n  SIZE -->|no| FAIL[\"Raise ValueError\"]\n  B64 --> MSG --> CALL --> STRIP --> PARSE --> OUT\n"
+    },
+    {
+      "id": "clients",
+      "title": "Two equivalent clients",
+      "kicker": "Setup + clients",
+      "blurb": "Same key, same model, same prompt. xAI SDK or the OpenAI-compatible client against api.x.ai. Billing is API tokens — not SuperGrok quota.",
+      "type": "mermaid",
+      "source": "---\nconfig:\n  theme: base\n  themeVariables:\n    darkMode: true\n    background: transparent\n    primaryColor: \"#1c1e21\"\n    primaryTextColor: \"#ecece6\"\n    primaryBorderColor: \"#4d5358\"\n    lineColor: \"#9aa3a8\"\n    secondaryColor: \"#24272b\"\n    tertiaryColor: \"#151719\"\n    fontFamily: \"IBM Plex Sans, ui-sans-serif, system-ui, sans-serif\"\n    fontSize: \"14px\"\n    clusterBkg: \"#141618\"\n    clusterBorder: \"#3a3f44\"\n    titleColor: \"#ecece6\"\n    edgeLabelBackground: \"#151719\"\n    nodeTextColor: \"#ecece6\"\n---\nflowchart TB\n  KEY[\"XAI_API_KEY<br/>console.x.ai · not SuperGrok\"]\n\n  subgraph sdk[\"xAI SDK\"]\n    S1[\"Client timeout=3600\"]\n    S2[\"chat.create grok-4.6\"]\n    S3[\"user + image\"]\n    S1 --> S2 --> S3\n  end\n\n  subgraph oai[\"OpenAI-compatible\"]\n    O1[\"OpenAI base_url=api.x.ai/v1\"]\n    O2[\"responses.create\"]\n    O3[\"input_image + input_text\"]\n    O1 --> O2 --> O3\n  end\n\n  SAME[\"Same PROMPT + high-detail crop\"]\n  JSON[\"JSON fragment\"]\n\n  KEY --> S1\n  KEY --> O1\n  S3 --> SAME\n  O3 --> SAME\n  SAME --> JSON\n"
+    },
+    {
+      "id": "quick-check",
+      "title": "Quick check",
+      "kicker": "Verify",
+      "blurb": "A real order-box crop plus the API key should return model.verbatim and options. If the SDK field name differs, print the response once and map it.",
+      "type": "mermaid",
+      "source": "---\nconfig:\n  theme: base\n  themeVariables:\n    darkMode: true\n    background: transparent\n    primaryColor: \"#1c1e21\"\n    primaryTextColor: \"#ecece6\"\n    primaryBorderColor: \"#4d5358\"\n    lineColor: \"#9aa3a8\"\n    secondaryColor: \"#24272b\"\n    tertiaryColor: \"#151719\"\n    fontFamily: \"IBM Plex Sans, ui-sans-serif, system-ui, sans-serif\"\n    fontSize: \"14px\"\n    clusterBkg: \"#141618\"\n    clusterBorder: \"#3a3f44\"\n    titleColor: \"#ecece6\"\n    edgeLabelBackground: \"#151719\"\n    nodeTextColor: \"#ecece6\"\n---\nflowchart LR\n  A[\"Place order_crop.png\"]\n  B[\"export XAI_API_KEY\"]\n  C[\"Run understand_order_crop\"]\n  D{\"Valid JSON?\"}\n  E[\"model.verbatim<br/>+ options[]\"]\n  F[\"Print response<br/>map .content / .text / .output_text\"]\n\n  A --> B --> C --> D\n  D -->|yes| E\n  D -->|no| F\n"
+    },
+    {
+      "id": "json-contract",
+      "title": "JSON contract fragment",
+      "kicker": "Prompt output",
+      "blurb": "Return only valid JSON. Read option letters from their positions. Do not invent order. Unclear relationships stay null with lower confidence.",
+      "type": "mermaid",
+      "source": "---\nconfig:\n  theme: base\n  themeVariables:\n    darkMode: true\n    background: transparent\n    primaryColor: \"#1c1e21\"\n    primaryTextColor: \"#ecece6\"\n    primaryBorderColor: \"#4d5358\"\n    lineColor: \"#9aa3a8\"\n    secondaryColor: \"#24272b\"\n    tertiaryColor: \"#151719\"\n    fontFamily: \"IBM Plex Sans, ui-sans-serif, system-ui, sans-serif\"\n    fontSize: \"14px\"\n    clusterBkg: \"#141618\"\n    clusterBorder: \"#3a3f44\"\n    titleColor: \"#ecece6\"\n    edgeLabelBackground: \"#151719\"\n    nodeTextColor: \"#ecece6\"\n---\nflowchart TB\n  ROOT[\"root\"]\n  MODEL[\"model\"]\n  CONF[\"confidence : number\"]\n  NOTES[\"notes : string[]\"]\n  VERB[\"verbatim : string\"]\n  SERIES[\"series : string | null\"]\n  OPTS[\"options[]\"]\n  CODE[\"code : string\"]\n  ROLE[\"role : string | null\"]\n  MEAN[\"meaning : string | null\"]\n\n  ROOT --> MODEL\n  ROOT --> CONF\n  ROOT --> NOTES\n  MODEL --> VERB\n  MODEL --> SERIES\n  MODEL --> OPTS\n  OPTS --> CODE\n  OPTS --> ROLE\n  OPTS --> MEAN\n"
+    }
+  ]
+}

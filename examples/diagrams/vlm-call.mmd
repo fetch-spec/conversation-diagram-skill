@@ -1,0 +1,34 @@
+---
+config:
+  theme: base
+  themeVariables:
+    darkMode: true
+    background: transparent
+    primaryColor: "#1c1e21"
+    primaryTextColor: "#ecece6"
+    primaryBorderColor: "#4d5358"
+    lineColor: "#9aa3a8"
+    secondaryColor: "#24272b"
+    tertiaryColor: "#151719"
+    fontFamily: "IBM Plex Sans, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "14px"
+    clusterBkg: "#141618"
+    clusterBorder: "#3a3f44"
+    titleColor: "#ecece6"
+    edgeLabelBackground: "#151719"
+    nodeTextColor: "#ecece6"
+---
+flowchart LR
+  FILE["Crop file<br/>jpg / jpeg / png"]
+  SIZE{"Size ≤ 20 MiB?"}
+  B64["base64 data URL"]
+  MSG["user + image<br/>detail = high"]
+  CALL["chat.sample()<br/>or responses.create"]
+  STRIP["Strip markdown fences"]
+  PARSE["json.loads"]
+  OUT["Contract fragment"]
+
+  FILE --> SIZE
+  SIZE -->|yes| B64
+  SIZE -->|no| FAIL["Raise ValueError"]
+  B64 --> MSG --> CALL --> STRIP --> PARSE --> OUT

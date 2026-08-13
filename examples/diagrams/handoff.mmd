@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant A as Alex
+  participant S as Sam
+  participant P as Priya
+  A->>S: cache still in review?
+  S-->>A: merges today, flag CHECKOUT_SKU_CACHE
+  A->>P: cover 504s until flag is on
+  P-->>A: acknowledged
+  S->>S: own cache metrics after ship

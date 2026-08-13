@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/fetch-spec/conversation-diagram-skill/manifest.schema.json",
+  "title": "conversation-diagram manifest",
+  "type": "object",
+  "required": ["title", "diagrams"],
+  "additionalProperties": true,
+  "properties": {
+    "title": { "type": "string", "minLength": 1 },
+    "source": { "type": "string", "description": "Path or label of the conversation file" },
+    "diagrams": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "type", "source"],
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]*$",
+            "description": "Output filename stem, kebab-case"
+          },
+          "title": { "type": "string" },
+          "kicker": { "type": "string" },
+          "blurb": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": [
+              "mermaid",
+              "plantuml",
+              "d2",
+              "graphviz",
+              "dot",
+              "bpmn",
+              "nomnoml",
+              "c4plantuml"
+            ]
+          },
+          "source": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

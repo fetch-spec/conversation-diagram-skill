@@ -1,0 +1,45 @@
+---
+config:
+  theme: base
+  themeVariables:
+    darkMode: true
+    background: transparent
+    primaryColor: "#1c1e21"
+    primaryTextColor: "#ecece6"
+    primaryBorderColor: "#4d5358"
+    lineColor: "#9aa3a8"
+    secondaryColor: "#24272b"
+    tertiaryColor: "#151719"
+    fontFamily: "IBM Plex Sans, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "14px"
+    clusterBkg: "#141618"
+    clusterBorder: "#3a3f44"
+    titleColor: "#ecece6"
+    edgeLabelBackground: "#151719"
+    nodeTextColor: "#ecece6"
+---
+flowchart TB
+  KEY["XAI_API_KEY<br/>console.x.ai · not SuperGrok"]
+
+  subgraph sdk["xAI SDK"]
+    S1["Client timeout=3600"]
+    S2["chat.create grok-4.6"]
+    S3["user + image"]
+    S1 --> S2 --> S3
+  end
+
+  subgraph oai["OpenAI-compatible"]
+    O1["OpenAI base_url=api.x.ai/v1"]
+    O2["responses.create"]
+    O3["input_image + input_text"]
+    O1 --> O2 --> O3
+  end
+
+  SAME["Same PROMPT + high-detail crop"]
+  JSON["JSON fragment"]
+
+  KEY --> S1
+  KEY --> O1
+  S3 --> SAME
+  O3 --> SAME
+  SAME --> JSON

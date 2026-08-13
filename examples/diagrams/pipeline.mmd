@@ -1,0 +1,55 @@
+---
+config:
+  theme: base
+  themeVariables:
+    darkMode: true
+    background: transparent
+    primaryColor: "#1c1e21"
+    primaryTextColor: "#ecece6"
+    primaryBorderColor: "#4d5358"
+    lineColor: "#9aa3a8"
+    secondaryColor: "#24272b"
+    tertiaryColor: "#151719"
+    fontFamily: "IBM Plex Sans, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "14px"
+    clusterBkg: "#141618"
+    clusterBorder: "#3a3f44"
+    titleColor: "#ecece6"
+    edgeLabelBackground: "#151719"
+    nodeTextColor: "#ecece6"
+---
+flowchart TB
+  PDF["PDF page"]
+
+  subgraph ingest["Rasterize + crop"]
+    direction TB
+    CROP["Crop order / options box"]
+    PNG["order_crop.png<br/>PNG or JPEG only"]
+    CROP --> PNG
+  end
+
+  subgraph vlm["VLM arm"]
+    direction TB
+    FN["understand_order_crop()"]
+    MODEL["grok-4.6 · detail high"]
+    JSON["Partial PTC JSON<br/>model + options"]
+    FN --> MODEL --> JSON
+  end
+
+  subgraph local["Text arm"]
+    direction TB
+    DOC["Docling on full page"]
+    SPEC["specs / tables"]
+    DOC --> SPEC
+  end
+
+  MERGE["merge → ptc.json"]
+  VAL["validate"]
+  DONE["done"]
+
+  PDF --> CROP
+  PDF --> DOC
+  PNG --> FN
+  JSON --> MERGE
+  SPEC --> MERGE
+  MERGE --> VAL --> DONE

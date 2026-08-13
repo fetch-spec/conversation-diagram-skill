@@ -1,0 +1,14 @@
+flowchart TB
+  P504["Checkout 504s when inventory is cold"]
+  CACHE["2s cache in front of SKU lookup"]
+  FLAG["Ship behind CHECKOUT_SKU_CACHE"]
+  ROLL["Rollback = flip the flag"]
+  ONCALL["Priya on-call for 504s"]
+  METRICS["Sam owns cache metrics"]
+  PDF["Receipt PDF — parked"]
+
+  P504 --> CACHE --> FLAG
+  FLAG --> ROLL
+  FLAG --> ONCALL
+  FLAG --> METRICS
+  P504 -.-> PDF

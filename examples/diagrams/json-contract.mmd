@@ -1,0 +1,41 @@
+---
+config:
+  theme: base
+  themeVariables:
+    darkMode: true
+    background: transparent
+    primaryColor: "#1c1e21"
+    primaryTextColor: "#ecece6"
+    primaryBorderColor: "#4d5358"
+    lineColor: "#9aa3a8"
+    secondaryColor: "#24272b"
+    tertiaryColor: "#151719"
+    fontFamily: "IBM Plex Sans, ui-sans-serif, system-ui, sans-serif"
+    fontSize: "14px"
+    clusterBkg: "#141618"
+    clusterBorder: "#3a3f44"
+    titleColor: "#ecece6"
+    edgeLabelBackground: "#151719"
+    nodeTextColor: "#ecece6"
+---
+flowchart TB
+  ROOT["root"]
+  MODEL["model"]
+  CONF["confidence : number"]
+  NOTES["notes : string[]"]
+  VERB["verbatim : string"]
+  SERIES["series : string | null"]
+  OPTS["options[]"]
+  CODE["code : string"]
+  ROLE["role : string | null"]
+  MEAN["meaning : string | null"]
+
+  ROOT --> MODEL
+  ROOT --> CONF
+  ROOT --> NOTES
+  MODEL --> VERB
+  MODEL --> SERIES
+  MODEL --> OPTS
+  OPTS --> CODE
+  OPTS --> ROLE
+  OPTS --> MEAN

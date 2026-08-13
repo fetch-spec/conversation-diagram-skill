@@ -1,0 +1,22 @@
+{
+  "title": "Standup — checkout cache",
+  "source": "generic-notes.md",
+  "diagrams": [
+    {
+      "id": "decision",
+      "title": "This week",
+      "kicker": "Decision",
+      "blurb": "Ship the SKU cache behind a flag. Receipt PDF is parked. Priya covers 504s until the flag is on.",
+      "type": "mermaid",
+      "source": "flowchart TB\n  P504[\"Checkout 504s when inventory is cold\"]\n  CACHE[\"2s cache in front of SKU lookup\"]\n  FLAG[\"Ship behind CHECKOUT_SKU_CACHE\"]\n  ROLL[\"Rollback = flip the flag\"]\n  ONCALL[\"Priya on-call for 504s\"]\n  METRICS[\"Sam owns cache metrics\"]\n  PDF[\"Receipt PDF — parked\"]\n\n  P504 --> CACHE --> FLAG\n  FLAG --> ROLL\n  FLAG --> ONCALL\n  FLAG --> METRICS\n  P504 -.-> PDF\n"
+    },
+    {
+      "id": "handoff",
+      "title": "Who owns what",
+      "kicker": "Sequence",
+      "blurb": "Sam lands the cache. Priya holds the pager until the flag is on, then Sam takes metrics.",
+      "type": "mermaid",
+      "source": "sequenceDiagram\n  participant A as Alex\n  participant S as Sam\n  participant P as Priya\n  A->>S: cache still in review?\n  S-->>A: merges today, flag CHECKOUT_SKU_CACHE\n  A->>P: cover 504s until flag is on\n  P-->>A: acknowledged\n  S->>S: own cache metrics after ship\n"
+    }
+  ]
+}
